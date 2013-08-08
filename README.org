@@ -7,12 +7,10 @@ Simple multithreading mailboxes for Common Lisp.
 (*mailboxp* /object/)---Return T iff /object/ is a mailbox object.  The object must obey the
 following interface.
 
-(*emptyp* /mailbox/)---Return T iff /mailbox/ is empty.
-
 (*post-mail* /object/ /mailbox/)---Add /object/ to /mailbox/.  /object/ is returned.
 
-(*read-mail* /mailbox/)---Return the oldest object from /mailbox/.  If the mailbox is empty, then
-NIL is returned.
+(*read-mail* /mailbox/)---Return multiple values of the oldest object in /mailbox/ and T if the
+mailbox is not empty, otherwise NIL and NIL.
 
 ** Dependencies
 This library uses the [[http://common-lisp.net/project/bordeaux-threads/][Bordeaux Threads]] library for working with locks.

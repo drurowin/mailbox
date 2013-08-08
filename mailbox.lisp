@@ -1,7 +1,6 @@
 (defpackage :mailbox
   (:use :cl)
-  (:export #:emptyp
-           #:mailboxp
+  (:export #:mailboxp
            #:make-mailbox
            #:post-mail
            #:read-mail))
@@ -23,10 +22,6 @@
 
 (defmethod mailboxp ((object mailbox)) t)
 
-(defmethod emptyp ((the mailbox))
-  (bordeaux-threads:with-lock-held ((slot-value the 'lock))
-    (slot-value the 'emptyp)))
-
 (defmethod post-mail (object (mailbox mailbox))
   (with-slots (lock emptyp mailbox tail)
       mailbox
@@ -44,11 +39,13 @@
   (with-slots (lock emptyp mailbox tail)
       mailbox
     (bordeaux-threads:with-lock-held (lock)
-      (unless emptyp
-        (prog1 (first mailbox)
-          (if (endp (rest mailbox))
-              (let ((empty (cons nil nil)))
-                (setf mailbox empty
-                      tail empty
-                      emptyp t))
-              (setf mailbox (rest mailbox))))))))
+      (if emptyp
+          (values nil nil)
+          (values (prog1 (first mailbox)
+                    (if (endp (rest mailbox))
+                        (let ((empty (cons nil nil)))
+                          (setf mailbox empty
+                                tail empty
+                                emptyp t))
+                        (setf mailbox (rest mailbox))))
+                  t)))))
