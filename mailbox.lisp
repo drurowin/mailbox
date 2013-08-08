@@ -46,8 +46,7 @@
     (bordeaux-threads:with-lock-held (lock)
       (unless emptyp
         (prog1 (first mailbox)
-          (if (eq (first mailbox)
-                  (first tail))
+          (if (endp (rest mailbox))
               (let ((empty (cons nil nil)))
                 (setf mailbox empty
                       tail empty
