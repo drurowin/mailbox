@@ -1,0 +1,21 @@
+* mailbox
+Simple multithreading mailboxes for Common Lisp.
+
+** API
+(*make-mailbox*)---Create a new mailbox object.
+
+(*mailboxp* /object/)---Return T iff /object/ is a mailbox object.  The object must obey the
+following interface.
+
+(*emptyp* /mailbox/)---Return T iff /mailbox/ is empty.
+
+(*post-mail* /object/ /mailbox/)---Add /object/ to /mailbox/.  /object/ is returned.
+
+(*read-mail* /mailbox/)---Return the oldest object from /mailbox/.  If the mailbox is empty, then
+NIL is returned.
+
+** Dependencies
+This library uses the [[http://common-lisp.net/project/bordeaux-threads/][Bordeaux Threads]] library for working with locks.
+
+** License
+*mailbox* is licensed under the MIT license.  That basically means you can do anything with it.
