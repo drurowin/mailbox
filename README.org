@@ -9,7 +9,7 @@ following interface.
 
 (*post-mail* /object/ /mailbox/)---Add /object/ to /mailbox/.  /object/ is returned.
 
-(*read-mail* /mailbox/)---Return multiple values of the oldest object in /mailbox/ and T if the
+(*read-mail* /mailbox/)---Return multiple values the oldest object in /mailbox/ and T if the
 mailbox is not empty, otherwise NIL and NIL.
 
 ** Dependencies
