@@ -20,32 +20,42 @@
 (defun make-mailbox ()
   (make-instance 'mailbox))
 
-(defmethod mailboxp ((object mailbox)) t)
+(defgeneric mailboxp (object)
+  (:documentation "Return T if OBJECT is a mailbox.")
+  (:method (object) nil)
+  (:method ((object mailbox)) t))
 
-(defmethod post-mail (object (mailbox mailbox))
-  (with-slots (lock emptyp mailbox tail)
-      mailbox
-    (bordeaux-threads:with-lock-held (lock)
-      (let ((mail (cons object nil)))
+(defgeneric post-mail (object mailbox)
+  (:documentation "Add OBJECT to MAILBOX.")
+  (:method (object (mailbox mailbox))
+    (with-slots (lock emptyp mailbox tail)
+        mailbox
+      (bordeaux-threads:with-lock-held (lock)
+        (let ((mail (cons object nil)))
+          (if emptyp
+              (setf mailbox mail
+                    tail mailbox
+                    emptyp nil)
+              (setf (cdr tail) mail
+                    tail mail))
+          object)))))
+
+(defgeneric read-mail (mailbox)
+  (:documentation "Retrieve oldest object from MAILBOX.
+
+If the mailbox is not empty return multiple values the object and T,
+otherwise NIL and NIL.")
+  (:method ((mailbox mailbox))
+    (with-slots (lock emptyp mailbox tail)
+        mailbox
+      (bordeaux-threads:with-lock-held (lock)
         (if emptyp
-            (setf mailbox mail
-                  tail mailbox
-                  emptyp nil)
-            (setf (cdr tail) mail
-                  tail mail))
-        object))))
-
-(defmethod read-mail ((mailbox mailbox))
-  (with-slots (lock emptyp mailbox tail)
-      mailbox
-    (bordeaux-threads:with-lock-held (lock)
-      (if emptyp
-          (values nil nil)
-          (values (prog1 (first mailbox)
-                    (if (endp (rest mailbox))
-                        (let ((empty (cons nil nil)))
-                          (setf mailbox empty
-                                tail empty
-                                emptyp t))
-                        (setf mailbox (rest mailbox))))
-                  t)))))
+            (values nil nil)
+            (values (prog1 (first mailbox)
+                      (if (endp (rest mailbox))
+                          (let ((empty (cons nil nil)))
+                            (setf mailbox empty
+                                  tail empty
+                                  emptyp t))
+                          (setf mailbox (rest mailbox))))
+                    t))))))
